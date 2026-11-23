@@ -1,0 +1,520 @@
+<!-- custom-font-mod-start -->
+<style id="custom-font-mod-fonts">
+@font-face{font-family:GoogleSansThai;src:url('fonts/GoogleSans-Regular.ttf');font-weight:400;}
+@font-face{font-family:GoogleSansThai;src:url('fonts/GoogleSans-Medium.ttf');font-weight:500;}
+@font-face{font-family:GoogleSansThai;src:url('fonts/GoogleSans-Bold.ttf');font-weight:700;}
+</style>
+<style id="custom-font-mod-active"></style>
+<style id="custom-font-mod-ui-css">
+.cf-dock{position:fixed;left:0;top:0;z-index:99999;display:none;flex-direction:column;gap:14px;font-family:var(--cf-ui-font,GoogleSansThai,"Leelawadee UI","Microsoft YaHei",sans-serif);color:#e6c47e;user-select:none;pointer-events:auto;}
+.cf-dock.cf-visible{display:flex;}
+.cf-row{display:flex;align-items:center;}
+.cf-label{color:#e6c47e;font-size:21px;font-weight:400;white-space:nowrap;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,.85);flex-shrink:0;box-sizing:border-box;padding-right:16px;}
+.cf-ctrl{position:relative;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.cf-trigger{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:240px;max-width:340px;padding:4px 14px;border-radius:0;border:1px solid rgba(230,196,126,.62);background:rgba(16,10,12,.38);color:#f5ebd6;font-size:19px;cursor:pointer;transition:border-color .15s,background .15s;}
+.cf-trigger:hover{border-color:#f6d998;background:rgba(40,18,22,.58);color:#fff;}
+.cf-trigger-val{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;}
+.cf-arrow{opacity:.85;font-size:13px;color:#e6c47e;}
+.cf-panel{position:absolute;left:0;top:calc(100% + 4px);width:320px;max-height:270px;display:none;flex-direction:column;border-radius:2px;border:1px solid rgba(230,196,126,.65);background:rgba(18,12,14,.96);backdrop-filter:blur(12px);box-shadow:0 14px 36px rgba(0,0,0,.82);overflow:hidden;z-index:100001;}
+.cf-panel.open{display:flex;}
+.cf-search-wrap{padding:8px;border-bottom:1px solid rgba(230,196,126,.22);}
+.cf-search{width:100%;box-sizing:border-box;padding:6px 10px;border-radius:2px;border:1px solid rgba(230,196,126,.4);background:rgba(255,255,255,.06);color:#fff;font-size:15px;outline:none;}
+.cf-search:focus{border-color:#e6c47e;}
+.cf-list{flex:1;overflow-y:auto;padding:4px;max-height:210px;}
+.cf-item{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:2px;cursor:pointer;font-size:15px;color:#e7e0d0;transition:background .12s;}
+.cf-item:hover{background:rgba(230,196,126,.18);}
+.cf-item.active{background:rgba(230,196,126,.28);color:#ffd98e;font-weight:600;}
+.cf-item-sample{font-size:13px;opacity:.75;margin-left:8px;}
+.cf-size-btn{padding:4px 16px;border-radius:0;border:1px solid transparent;background:transparent;color:#e6c47e;font-size:19px;cursor:pointer;transition:all .15s;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.85);}
+.cf-size-btn:hover{color:#fff;border-color:rgba(230,196,126,.4);}
+.cf-size-btn.active{border-color:rgba(240,215,165,.78);background:rgba(230,196,126,.08);color:#fff;}
+</style>
+<script id="custom-font-mod">
+(function () {
+  var DEFAULT_FONT = 'GoogleSansThai';
+  var FONT_KEY = 'undertone_custom_font';
+  var TH_IMAGES = new Set(["16+.0174e.png", "assets/ds_GameSource/native/11/111ec7a5-9147-4113-9e66-6cb1a738adf8.edb57.png", "assets/ds_HallSource/native/0f/0f7e64da-b035-48a1-b75f-01e5e7df90d2.4015b.jpg", "assets/ds_HallSource/native/13/13284cbe-d6be-4777-9f50-3868f398f446.b3935.jpg", "assets/ds_HallSource/native/52/52b6a6e4-f5ed-41a1-b52b-e053d1f32371.ec48f.jpg", "assets/ds_HallSource/native/5f/5fed7164-f5fd-4db3-914a-0c67c0b5f620.fc0da.png", "assets/ds_HallSource/native/93/93911559-5578-4aee-9aad-7e1c2cec96b9.3dcac.png", "assets/ds_HallSource/native/9a/9a7216ec-ba04-4f68-a484-de4da1d8dc56.8a0aa.png", "assets/ds_HallSource/native/a7/a70d737e-257e-4188-a55b-8611202eefd7.68608.png", "assets/ds_HallSource/native/c8/c8a67ed7-a2b7-402b-a197-515583f1b49f.2161a.jpg", "assets/ds_HallSource/native/d4/d4525d52-e572-422f-bc72-32871da96459.659c5.png", "assets/resources/native/88/8887734d-51a3-49ce-b176-a6024917fbab.fb1f7.png", "BesTV.1c562.png", "logo.68608.png", "sj.cd69b.jpg", "splash.b922f.png"]);
+  var HARD_MAP = {"未知错误": "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ", "加载错误重新加载游戏！": "โหลดไม่สำเร็จ โปรดเปิดเกมใหม่", "加载失败": "โหลดไม่สำเร็จ", "加入愿望单": "เพิ่มในรายการที่อยากได้", "上一章通关解锁": "ผ่านบทก่อนหน้าเพื่อปลดล็อก", "简体中文": "ภาษาไทย", "繁體中文": "จีนตัวเต็ม", "繁体中文": "จีนตัวเต็ม", "正在同步数据": "กำลังซิงก์ข้อมูล", "正在开发中": "กำลังพัฒนา", "复制成功": "คัดลอกแล้ว", "游戏攻略": "คู่มือเกม", "猜你喜欢": "เกมที่คุณอาจชอบ", "领取奖励": "รับรางวัล", "兑换成功": "แลกสำเร็จ", "兑换失败": "แลกไม่สำเร็จ", "不满足参与条件": "คุณยังไม่ตรงตามเงื่อนไขการเข้าร่วม", "请先绑定手机~": "โปรดผูกหมายเลขโทรศัพท์ก่อน", "暂不支持绑定~": "ยังไม่รองรับการผูกบัญชี", "完成节点数": "จำนวนฉากที่เล่นจบแล้ว", "节点总数": "จำนวนฉากทั้งหมด", "抽奖失败": "สุ่มรางวัลไม่สำเร็จ", "抽奖次数不足": "สิทธิ์สุ่มรางวัลไม่เพียงพอ", "请先获取任意兑换券": "โปรดรับคูปองแลกของก่อน", "是不是对互动影游的兴趣又增加了呀？接下来就开始自由探索吧~": "พร้อมแล้วก็ออกไปสำรวจเกมหนังอินเทอร์แอ็กทีฟกันเลย!", "首次加载时间较长，请耐心等待": "การโหลดครั้งแรกใช้เวลานาน โปรดรอสักครู่", "正在启动引擎...": "กำลังเริ่มระบบ…", "正在加载资源...": "กำลังโหลดทรัพยากร…"};
+
+  window.__isThaiLang = function () {
+    try {
+      if (window.__undertoneI18n && window.__undertoneI18n.language) {
+        return window.__undertoneI18n.language === 'th';
+      }
+      var ul = localStorage.getItem('undertone_lang');
+      if (ul) return ul === 'th';
+      var raw = localStorage.getItem('app_local_data');
+      if (raw) {
+        var obj = JSON.parse(raw);
+        if (obj && obj.settingLanguage) return obj.settingLanguage === 'th';
+      }
+      return false;
+    } catch (e) {
+      return localStorage.getItem('undertone_lang') === 'th';
+    }
+  };
+
+  // Thai data tables loaded asynchronously at boot
+  window.__thData = { ds: {}, shared: {}, fgui: {}, subtitles: null, ready: false };
+  window.__thLangLookup = function (scope, key) {
+    var tbl = scope === 'main' ? window.__thData.shared : window.__thData.ds;
+    return tbl && tbl[String(key)];
+  };
+  window.__thFguiTranslate = function (text) {
+    if (!text || !window.__isThaiLang()) return text;
+    var map = window.__thData.fgui;
+    if (map && Object.prototype.hasOwnProperty.call(map, text)) return map[text];
+    return text;
+  };
+  window.__thStr = function (orig, th) {
+    return window.__isThaiLang() ? th : orig;
+  };
+
+  function loadJson(url, cb) {
+    fetch(url).then(function (r) { return r.json(); }).then(cb).catch(function () {});
+  }
+  loadJson('th_lang_table.json', function (d) {
+    if (d) { window.__thData.ds = d.ds || {}; window.__thData.shared = d.shared || {}; }
+  });
+  loadJson('th_fgui_map.json', function (d) {
+    if (d) { window.__thData.fgui = d || {}; if (window.__thRefreshAllFgui) window.__thRefreshAllFgui(); }
+  });
+  loadJson('th_subtitles.json', function (d) {
+    if (d) { window.__thData.subtitles = d; }
+  });
+
+  // Redirect localized images to th_images/ when Thai is active
+  function remapImageUrl(url) {
+    if (!url || typeof url !== 'string' || !window.__isThaiLang()) return url;
+    if (url.indexOf('th_images/') !== -1) return url;
+    var clean = url.split('?')[0].split('#')[0].replace(/\\/g, '/');
+    for (var rel of TH_IMAGES) {
+      if (clean === rel || clean.endsWith('/' + rel)) {
+        return 'th_images/' + rel;
+      }
+    }
+    return url;
+  }
+  window.__remapThaiImageUrl = remapImageUrl;
+
+  var imgDesc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
+  if (imgDesc && imgDesc.set) {
+    Object.defineProperty(HTMLImageElement.prototype, 'src', {
+      configurable: true,
+      enumerable: imgDesc.enumerable,
+      get: imgDesc.get,
+      set: function (val) {
+        return imgDesc.set.call(this, remapImageUrl(val));
+      }
+    });
+  }
+
+  if (window.XMLHttpRequest && XMLHttpRequest.prototype.open) {
+    var origXhrOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function (method, url) {
+      var args = Array.prototype.slice.call(arguments);
+      if (typeof url === 'string') args[1] = remapImageUrl(url);
+      return origXhrOpen.apply(this, args);
+    };
+  }
+
+  if (typeof window.fetch === 'function') {
+    var origFetch = window.fetch;
+    window.fetch = function (input, init) {
+      if (typeof input === 'string') input = remapImageUrl(input);
+      return origFetch.call(this, input, init);
+    };
+  }
+
+  window.__thRefreshLocalizedTextures = function () {
+    try {
+      if (!window.cc || !cc.assetManager || !cc.assetManager.assets || !cc.assetManager.assets._map) return;
+      var isTh = window.__isThaiLang();
+      var map = cc.assetManager.assets._map;
+      Object.keys(map).forEach(function (k) {
+        var asset = map[k];
+        if (!asset || typeof asset.initWithElement !== 'function') return;
+        var url = asset.nativeUrl || asset._url || '';
+        if (!url) return;
+        var matchedRel = null;
+        var clean = url.split('?')[0].split('#')[0];
+        for (var rel of TH_IMAGES) {
+          if (clean === rel || clean.endsWith('/' + rel) || clean.endsWith('/th_images/' + rel)) {
+            matchedRel = rel;
+            break;
+          }
+        }
+        if (!matchedRel) return;
+        var targetUrl = isTh ? ('th_images/' + matchedRel) : matchedRel;
+        var im = new Image();
+        im.onload = function () {
+          try { asset.initWithElement(im); } catch (e) {}
+        };
+        if (imgDesc && imgDesc.set) {
+          imgDesc.set.call(im, targetUrl);
+        } else {
+          im.src = targetUrl;
+        }
+      });
+    } catch (e) {}
+  };
+
+  // Apply splash / title localization immediately on boot if Thai is selected
+  function translateDomTextNodes(root) {
+    if (!root || !window.__isThaiLang()) return;
+    var walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+    var node;
+    while ((node = walk.nextNode())) {
+      var t = node.nodeValue;
+      if (!t) continue;
+      for (var k in HARD_MAP) {
+        if (t.indexOf(k) !== -1) t = t.split(k).join(HARD_MAP[k]);
+      }
+      t = t.replace('备案号：', 'เลขทะเบียน ').replace('互影派', 'Interactipie');
+      if (t !== node.nodeValue) node.nodeValue = t;
+    }
+  }
+  function applyBootDomThai() {
+    if (!window.__isThaiLang()) return;
+    document.title = 'ม่านลวงบ่วงแค้น';
+    translateDomTextNodes(document.body || document.documentElement);
+    document.querySelectorAll('img').forEach(function (im) {
+      var s = im.getAttribute('src');
+      var r = remapImageUrl(s);
+      if (r !== s) im.setAttribute('src', r);
+    });
+    var prog = document.getElementById('progress-status');
+    if (prog && !prog.__cfObs) {
+      prog.__cfObs = true;
+      new MutationObserver(function () { translateDomTextNodes(prog); }).observe(prog, { childList: true, characterData: true, subtree: true });
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyBootDomThai);
+  } else {
+    applyBootDomThai();
+  }
+
+  // System Font Picker & Separate UI / Subtitle Size Scale logic
+  var UI_SCALE_KEY = 'undertone_ui_scale';
+  var SUB_SCALE_KEY = 'undertone_sub_scale';
+  var UI_I18N = {
+    'th': { fontLabel: 'เลือกฟอนต์', uiSizeLabel: 'ขนาดฟอนต์ UI', subSizeLabel: 'ขนาดฟอนต์คำบรรยาย', search: 'ค้นหาฟอนต์ Windows...', defName: 'GoogleSansThai (ค่าเริ่มต้น)', sizes: [['ปกติ (100%)', 1.0], ['กลาง (120%)', 1.2], ['ใหญ่ (150%)', 1.5], ['ใหญ่มาก (180%)', 1.8]] },
+    'zh': { fontLabel: '选择字体', uiSizeLabel: '界面字体大小', subSizeLabel: '字幕字体大小', search: '搜索 Windows 字体...', defName: 'GoogleSansThai (默认)', sizes: [['正常 (100%)', 1.0], ['中等 (120%)', 1.2], ['大号 (150%)', 1.5], ['超大 (180%)', 1.8]] },
+    'zh-tw': { fontLabel: '選擇字體', uiSizeLabel: '介面字體大小', subSizeLabel: '字幕字體大小', search: '搜尋 Windows 字體...', defName: 'GoogleSansThai (預設)', sizes: [['正常 (100%)', 1.0], ['中等 (120%)', 1.2], ['大號 (150%)', 1.5], ['超大 (180%)', 1.8]] },
+    'en': { fontLabel: 'Select Font', uiSizeLabel: 'UI Font Size', subSizeLabel: 'Subtitle Font Size', search: 'Search Windows fonts...', defName: 'GoogleSansThai (Default)', sizes: [['Normal (100%)', 1.0], ['Medium (120%)', 1.2], ['Large (150%)', 1.5], ['Extra Large (180%)', 1.8]] },
+    'ja': { fontLabel: 'フォント選択', uiSizeLabel: 'UI フォントサイズ', subSizeLabel: '字幕フォントサイズ', search: 'Windows フォント検索...', defName: 'GoogleSansThai (標準)', sizes: [['標準 (100%)', 1.0], ['中 (120%)', 1.2], ['大 (150%)', 1.5], ['特大 (180%)', 1.8]] },
+    'ko': { fontLabel: '글꼴 선택', uiSizeLabel: 'UI 글꼴 크기', subSizeLabel: '자막 글꼴 크기', search: 'Windows 글꼴 검색...', defName: 'GoogleSansThai (기본값)', sizes: [['보통 (100%)', 1.0], ['중간 (120%)', 1.2], ['크게 (150%)', 1.5], ['아주 크게 (180%)', 1.8]] }
+  };
+  function getCurLang() {
+    try {
+      if (window.__undertoneI18n && window.__undertoneI18n.language) return window.__undertoneI18n.language;
+      return localStorage.getItem('settingLanguage') || 'zh';
+    } catch (e) { return 'zh'; }
+  }
+  function getUiDict() {
+    var l = getCurLang();
+    return UI_I18N[l] || UI_I18N['en'];
+  }
+  function getActiveFont() {
+    return localStorage.getItem(FONT_KEY) || DEFAULT_FONT;
+  }
+  function getScale(key) {
+    var v = parseFloat(localStorage.getItem(key) || '1');
+    return isNaN(v) || v < 0.8 || v > 2.5 ? 1.0 : v;
+  }
+  window.__cfActiveFont = getActiveFont();
+  window.__cfUiScale = getScale(UI_SCALE_KEY);
+  window.__cfSubScale = getScale(SUB_SCALE_KEY);
+
+  function refreshCocosFonts(fontName) {
+    try {
+      var fullFamily = fontName + ',"Microsoft YaHei","Meiryo","Malgun Gothic","Leelawadee UI",sans-serif';
+      if (window.fgui && fgui.UIConfig) {
+        fgui.UIConfig.defaultFont = fontName;
+      }
+      if (window.fgui && fgui.GRoot && fgui.GRoot.inst) {
+        var visitGObj = function (gobj) {
+          if (!gobj) return;
+          if (gobj instanceof fgui.GTextField) {
+            gobj._realFont = fontName;
+            if (typeof gobj.updateFont === 'function') gobj.updateFont();
+            if (typeof gobj.updateFontSize === 'function') gobj.updateFontSize();
+            if (typeof gobj.markSizeChanged === 'function') gobj.markSizeChanged();
+            if (typeof gobj.updateText === 'function') gobj.updateText();
+            if (gobj._label && typeof gobj._label._forceUpdateRenderData === 'function') gobj._label._forceUpdateRenderData(true);
+            if (gobj._richText && typeof gobj._richText._updateRichText === 'function') gobj._richText._updateRichText();
+          }
+          if (gobj._children && gobj._children.length) {
+            for (var i = 0; i < gobj._children.length; i++) visitGObj(gobj._children[i]);
+          }
+        };
+        visitGObj(fgui.GRoot.inst);
+      }
+      if (window.cc && cc.director && cc.director.getScene) {
+        var scene = cc.director.getScene();
+        if (scene) {
+          var labels = scene.getComponentsInChildren(cc.Label) || [];
+          for (var i = 0; i < labels.length; i++) {
+            if (!(labels[i].font instanceof cc.BitmapFont)) {
+              labels[i].fontFamily = fullFamily;
+              labels[i].useSystemFont = true;
+              if (labels[i]._forceUpdateRenderData) labels[i]._forceUpdateRenderData(true);
+            }
+          }
+          var riches = scene.getComponentsInChildren(cc.RichText) || [];
+          for (var j = 0; j < riches.length; j++) {
+            if (!(riches[j].font instanceof cc.BitmapFont)) {
+              riches[j].fontFamily = fullFamily;
+              riches[j].useSystemFont = true;
+              if (riches[j]._updateRichText) riches[j]._updateRichText();
+            }
+          }
+        }
+      }
+    } catch (e) {}
+  }
+  window.__cfRefreshCocosFonts = refreshCocosFonts;
+
+  function applyFont(fontName) {
+    window.__cfActiveFont = fontName;
+    localStorage.setItem(FONT_KEY, fontName);
+    var styleEl = document.getElementById('custom-font-mod-active');
+    if (styleEl) {
+      var quoted = fontName.indexOf(' ') !== -1 ? '"' + fontName + '"' : fontName;
+      styleEl.textContent =
+        ':root{--cf-ui-font:' + quoted + ',GoogleSansThai,"Microsoft YaHei","Leelawadee UI",sans-serif;}' +
+        'body,#splash,#splash-info,#progress-status,#icp{font-family:' + quoted + ',GoogleSansThai,"Microsoft YaHei","Leelawadee UI",sans-serif!important;}';
+    }
+    refreshCocosFonts(fontName);
+  }
+  function applyUiScale(scaleVal) {
+    window.__cfUiScale = scaleVal;
+    localStorage.setItem(UI_SCALE_KEY, String(scaleVal));
+    refreshCocosFonts(getActiveFont());
+  }
+  function applySubScale(scaleVal) {
+    window.__cfSubScale = scaleVal;
+    localStorage.setItem(SUB_SCALE_KEY, String(scaleVal));
+    refreshCocosFonts(getActiveFont());
+  }
+  applyFont(window.__cfActiveFont);
+
+  // Docked Settings UI (placed right below Language row)
+  var dockEl = null, fontLabelEl = null, uiSizeLabelEl = null, subSizeLabelEl = null;
+  var triggerValEl = null, panelEl = null, searchEl = null, listEl = null, uiSizeCtrlEl = null, subSizeCtrlEl = null;
+  var allFonts = [DEFAULT_FONT, 'Leelawadee UI', 'Tahoma', 'Segoe UI', 'TH Sarabun New', 'Cordia New', 'Microsoft YaHei'];
+  var fontsLoaded = false;
+
+  function renderFontList(filter) {
+    if (!listEl) return;
+    var dict = getUiDict();
+    var q = (filter || '').toLowerCase();
+    var current = getActiveFont();
+    listEl.innerHTML = '';
+    var items = allFonts.filter(function (f) { return !q || f.toLowerCase().indexOf(q) !== -1; });
+    items.forEach(function (name) {
+      var row = document.createElement('div');
+      row.className = 'cf-item' + (name === current ? ' active' : '');
+      var spanName = document.createElement('span');
+      spanName.textContent = name === DEFAULT_FONT ? dict.defName : name;
+      spanName.style.fontFamily = (name.indexOf(' ') !== -1 ? '"' + name + '"' : name) + ',sans-serif';
+      var spanSample = document.createElement('span');
+      spanSample.className = 'cf-item-sample';
+      spanSample.textContent = getCurLang() === 'th' ? 'กขค' : 'Aa';
+      spanSample.style.fontFamily = spanName.style.fontFamily;
+      row.appendChild(spanName);
+      row.appendChild(spanSample);
+      row.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        applyFont(name);
+        if (triggerValEl) triggerValEl.textContent = name === DEFAULT_FONT ? dict.defName : name;
+        if (panelEl) panelEl.classList.remove('open');
+        renderFontList(searchEl ? searchEl.value : '');
+      });
+      listEl.appendChild(row);
+    });
+  }
+
+  function renderSizeGroup(container, curVal, onPick) {
+    if (!container) return;
+    var dict = getUiDict();
+    container.innerHTML = '';
+    dict.sizes.forEach(function (pair) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'cf-size-btn' + (Math.abs(pair[1] - curVal) < 0.01 ? ' active' : '');
+      btn.textContent = pair[0];
+      btn.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        onPick(pair[1]);
+      });
+      container.appendChild(btn);
+    });
+  }
+
+  function renderAllSizeButtons() {
+    renderSizeGroup(uiSizeCtrlEl, getScale(UI_SCALE_KEY), function (v) {
+      applyUiScale(v);
+      renderAllSizeButtons();
+    });
+    renderSizeGroup(subSizeCtrlEl, getScale(SUB_SCALE_KEY), function (v) {
+      applySubScale(v);
+      renderAllSizeButtons();
+    });
+  }
+
+  function refreshDockText() {
+    if (!dockEl) return;
+    var dict = getUiDict();
+    if (fontLabelEl) fontLabelEl.textContent = dict.fontLabel;
+    if (uiSizeLabelEl) uiSizeLabelEl.textContent = dict.uiSizeLabel;
+    if (subSizeLabelEl) subSizeLabelEl.textContent = dict.subSizeLabel;
+    if (searchEl) searchEl.placeholder = dict.search;
+    if (triggerValEl) {
+      var af = getActiveFont();
+      triggerValEl.textContent = af === DEFAULT_FONT ? dict.defName : af;
+    }
+    renderAllSizeButtons();
+  }
+  window.__cfRefreshDockText = refreshDockText;
+
+  function updateDockPosition() {
+    if (!dockEl || !dockEl.classList.contains('cf-visible')) return;
+    var vw = window.innerWidth || 1280;
+    var vh = window.innerHeight || 720;
+    var leftPx = vw * 0.21;
+    var topPx = vh * 0.48;
+    var labelW = vw * 0.13;
+    var lblPx = Math.max(15, Math.round(vh * 0.026));
+    var btnPx = Math.max(14, Math.round(vh * 0.023));
+    try {
+      if (window.fgui && fgui.GRoot && fgui.GRoot.inst) {
+        var rw = fgui.GRoot.inst.width || 1;
+        var rh = fgui.GRoot.inst.height || 1;
+        var gs = window.GameSetting;
+        if (gs && gs.fObj && gs.fObj.visible && gs.txtLang && gs.langList) {
+          var pLbl = gs.txtLang.localToGlobal(0, 0);
+          var pLst = gs.langList.localToGlobal(0, gs.langList.height);
+          leftPx = (pLbl.x / rw) * vw;
+          topPx = ((pLst.y / rh) * vh) + Math.round(vh * 0.022);
+          labelW = Math.max(120, ((gs.langList.localToGlobal(0, 0).x - pLbl.x) / rw) * vw);
+          if (gs.txtLang.fontSize) lblPx = Math.max(15, Math.round((gs.txtLang.fontSize / rh) * vh));
+        } else if (window.__activeSettingView && window.__activeSettingView.langBtn) {
+          var sv = window.__activeSettingView;
+          var pBtn = sv.langBtn.localToGlobal(0, sv.langBtn.height);
+          leftPx = (pBtn.x / rw) * vw;
+          topPx = ((pBtn.y / rh) * vh) + 12;
+          labelW = 140;
+        }
+      }
+    } catch (e) {}
+    dockEl.style.left = Math.round(leftPx) + 'px';
+    dockEl.style.top = Math.round(topPx) + 'px';
+    [fontLabelEl, uiSizeLabelEl, subSizeLabelEl].forEach(function (el) {
+      if (el) {
+        el.style.width = Math.round(labelW) + 'px';
+        el.style.fontSize = lblPx + 'px';
+      }
+    });
+    dockEl.querySelectorAll('.cf-trigger, .cf-size-btn').forEach(function (el) {
+      el.style.fontSize = btnPx + 'px';
+    });
+  }
+  window.addEventListener('resize', updateDockPosition);
+
+  function ensureDockDom() {
+    if (dockEl || !document.body) return;
+    dockEl = document.createElement('div');
+    dockEl.className = 'cf-dock';
+    dockEl.innerHTML =
+      '<div class="cf-row">' +
+        '<div class="cf-label" id="cf-font-label"></div>' +
+        '<div class="cf-ctrl">' +
+          '<button type="button" class="cf-trigger">' +
+            '<span class="cf-trigger-val"></span><span class="cf-arrow">▾</span>' +
+          '</button>' +
+          '<div class="cf-panel">' +
+            '<div class="cf-search-wrap"><input type="text" class="cf-search"></div>' +
+            '<div class="cf-list"></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="cf-row">' +
+        '<div class="cf-label" id="cf-ui-size-label"></div>' +
+        '<div class="cf-ctrl" id="cf-ui-size-ctrl"></div>' +
+      '</div>' +
+      '<div class="cf-row">' +
+        '<div class="cf-label" id="cf-sub-size-label"></div>' +
+        '<div class="cf-ctrl" id="cf-sub-size-ctrl"></div>' +
+      '</div>';
+    document.body.appendChild(dockEl);
+    fontLabelEl = dockEl.querySelector('#cf-font-label');
+    uiSizeLabelEl = dockEl.querySelector('#cf-ui-size-label');
+    subSizeLabelEl = dockEl.querySelector('#cf-sub-size-label');
+    uiSizeCtrlEl = dockEl.querySelector('#cf-ui-size-ctrl');
+    subSizeCtrlEl = dockEl.querySelector('#cf-sub-size-ctrl');
+    triggerValEl = dockEl.querySelector('.cf-trigger-val');
+    panelEl = dockEl.querySelector('.cf-panel');
+    searchEl = dockEl.querySelector('.cf-search');
+    listEl = dockEl.querySelector('.cf-list');
+
+    dockEl.querySelector('.cf-trigger').addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      var opening = !panelEl.classList.contains('open');
+      panelEl.classList.toggle('open', opening);
+      if (opening) {
+        loadSystemFonts();
+        renderFontList(searchEl.value);
+        setTimeout(function () { searchEl.focus(); }, 20);
+      }
+    });
+    searchEl.addEventListener('input', function () { renderFontList(searchEl.value); });
+    searchEl.addEventListener('keydown', function (ev) { ev.stopPropagation(); });
+    listEl.addEventListener('wheel', function (ev) { ev.stopPropagation(); }, { passive: true });
+    document.addEventListener('click', function (ev) {
+      if (dockEl && !dockEl.contains(ev.target)) panelEl.classList.remove('open');
+    });
+    refreshDockText();
+  }
+
+  function loadSystemFonts() {
+    if (fontsLoaded) return;
+    fontsLoaded = true;
+    if (window.undertoneFontAPI && typeof window.undertoneFontAPI.getSystemFonts === 'function') {
+      window.undertoneFontAPI.getSystemFonts().then(function (list) {
+        if (Array.isArray(list) && list.length) {
+          var merged = [DEFAULT_FONT];
+          for (var i = 0; i < list.length; i++) {
+            if (list[i] !== DEFAULT_FONT) merged.push(list[i]);
+          }
+          allFonts = merged;
+          renderFontList(searchEl ? searchEl.value : '');
+        }
+      }).catch(function () {});
+    }
+  }
+
+  window.__cfSetSettingOpen = function (isOpen) {
+    ensureDockDom();
+    if (!dockEl) return;
+    dockEl.classList.toggle('cf-visible', !!isOpen);
+    if (!isOpen && panelEl) panelEl.classList.remove('open');
+    if (isOpen) {
+      refreshDockText();
+      loadSystemFonts();
+      updateDockPosition();
+      setTimeout(updateDockPosition, 60);
+    }
+  };
+
+  window.addEventListener('keydown', function (ev) {
+    if (ev.key === 'F9') {
+      ensureDockDom();
+      if (!dockEl) return;
+      window.__cfSetSettingOpen(!dockEl.classList.contains('cf-visible'));
+    }
+  });
+})();
+</script>
+<!-- custom-font-mod-end -->
